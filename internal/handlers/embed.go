@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"html/template"
 	"net/http"
 
@@ -50,13 +51,21 @@ func (h *EmbedHandler) Embed(w http.ResponseWriter, r *http.Request) {
 
 	pageFmt := h.storage.DetectPageFormat(fb.ID)
 	var pages []string
+	var thumbs []string
 	for i := 1; i <= fb.PageCount; i++ {
 		pages = append(pages, h.storage.PageImageURL(fb.ID, pageFmt, i))
+		thumbs = append(thumbs, h.storage.ThumbImageURL(fb.ID, pageFmt, i))
 	}
 
+	pageTexts := h.storage.LoadPageTexts(fb.ID)
+	pageTextsJSON, _ := json.Marshal(pageTexts)
+
 	h.tmpl.ExecuteTemplate(w, "embed", map[string]interface{}{
-		"Flipbook": fb,
-		"Pages":    pages,
-		"BaseURL":  h.baseURL,
+		"Flipbook":      fb,
+		"Pages":         pages,
+		"Thumbs":        thumbs,
+		"PageTexts":     pageTexts,
+		"PageTextsJSON": template.JS(pageTextsJSON),
+		"BaseURL":       h.baseURL,
 	})
 }

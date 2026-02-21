@@ -2,6 +2,8 @@
 
 A lightweight, self-hosted flipbook generator. Upload PowerPoint or PDF files and get beautiful 3D page-curl flipbooks hosted as SEO-optimized webpages, or embeddable in any site via iframe.
 
+**[See a live example](https://metavert.io/flipbook)**
+
 ## Features
 
 - **Upload & convert** PowerPoint (.pptx, .ppt) and PDF files to interactive flipbooks

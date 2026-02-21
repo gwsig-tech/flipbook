@@ -422,7 +422,11 @@ img.grid-page-img {
 
 /* Fullscreen adjustments */
 :fullscreen #flipbook-container {
-    padding: 10px;
+    padding: 5px;
+}
+
+:fullscreen #attribution {
+    display: none;
 }
 
 /* Responsive */

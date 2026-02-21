@@ -5,22 +5,66 @@ document.addEventListener('DOMContentLoaded', function() {
     var container = document.getElementById('flipbook');
     var wrapper = document.getElementById('flipbook-container');
 
-    // Calculate single-page dimensions to fill the viewport height
+    // Calculate single-page dimensions to fill the available space
     var aspect = data.pageWidth / data.pageHeight;
-    var maxH = wrapper.clientHeight - 40;
-    var maxW = wrapper.clientWidth - 40;
-    var h = Math.min(maxH, 900);
-    var w = h * aspect;
-    if (w > maxW) {
-        w = maxW;
-        h = w / aspect;
-    }
-    w = Math.round(w);
-    h = Math.round(h);
+    var isFullscreen = false;
 
-    // Force single-page: constrain the container so only one page fits
-    container.style.width = w + 'px';
-    container.style.height = h + 'px';
+    function calcSize() {
+        var availH, availW;
+        if (isFullscreen) {
+            // In fullscreen, use screen dimensions minus controls bar (~57px)
+            availH = screen.height - 70;
+            availW = screen.width - 20;
+        } else {
+            availH = wrapper.clientHeight - 40;
+            availW = wrapper.clientWidth - 40;
+        }
+        var h = availH;
+        var w = h * aspect;
+        if (w > availW) {
+            w = availW;
+            h = w / aspect;
+        }
+        return { w: Math.round(w), h: Math.round(h) };
+    }
+
+    var currentPage = 0;
+    var pageFlip = null;
+
+    function initFlipbook(startPage) {
+        // Clear any previous StPageFlip content
+        container.innerHTML = '';
+
+        var size = calcSize();
+        container.style.width = size.w + 'px';
+        container.style.height = size.h + 'px';
+
+        pageFlip = new St.PageFlip(container, {
+            width: size.w,
+            height: size.h,
+            size: 'fixed',
+            drawShadow: true,
+            flippingTime: 300,
+            usePortrait: true,
+            startZIndex: 0,
+            startPage: startPage,
+            autoSize: false,
+            maxShadowOpacity: 0.6,
+            showCover: true,
+            mobileScrollSupport: true,
+            swipeDistance: 30,
+            useMouseEvents: true,
+            disableFlipByClick: false
+        });
+
+        pageFlip.loadFromImages(data.pages);
+
+        pageFlip.on('flip', function(e) {
+            updatePageDisplay(e.data);
+        });
+
+        updatePageDisplay(startPage);
+    }
 
     // Check for deep-link: ?page=N
     var startPage = 0;
@@ -30,28 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
         startPage = pageParam - 1;
     }
 
-    // Initialize StPageFlip - single page, fast flip
-    var pageFlip = new St.PageFlip(container, {
-        width: w,
-        height: h,
-        size: 'fixed',
-        drawShadow: true,
-        flippingTime: 300,
-        usePortrait: true,
-        startZIndex: 0,
-        startPage: startPage,
-        autoSize: false,
-        maxShadowOpacity: 0.6,
-        showCover: true,
-        mobileScrollSupport: true,
-        swipeDistance: 30,
-        useMouseEvents: true,
-        disableFlipByClick: false
-    });
-
-    pageFlip.loadFromImages(data.pages);
-
-    var currentPage = startPage;
+    initFlipbook(startPage);
 
     // Update page display
     function updatePageDisplay(pageIndex) {
@@ -64,14 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Set initial state
-    updatePageDisplay(startPage);
-
     // Page navigation
-    pageFlip.on('flip', function(e) {
-        updatePageDisplay(e.data);
-    });
-
     var prevBtn = document.getElementById('btn-prev');
     var nextBtn = document.getElementById('btn-next');
 
@@ -191,6 +207,20 @@ document.addEventListener('DOMContentLoaded', function() {
             el.webkitRequestFullscreen();
         }
     }
+
+    // Rebuild flipbook at new size on fullscreen change
+    function onFullscreenChange() {
+        isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+        var savedPage = currentPage;
+        // Wait for the browser to finish the fullscreen transition
+        setTimeout(function() {
+            pageFlip.destroy();
+            initFlipbook(savedPage);
+        }, 200);
+    }
+
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
 
     // Share modal
     var shareBtn = document.getElementById('btn-share');
@@ -430,18 +460,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateSearchStatus() {
         var statusEl = document.getElementById('search-status');
+        if (!statusEl) return;
         var prevBtn = document.getElementById('search-prev');
         var nextBtn = document.getElementById('search-next');
 
         if (searchMatches.length > 0) {
             statusEl.textContent = (searchMatchIndex + 1) + ' / ' + searchMatches.length;
-            prevBtn.disabled = false;
-            nextBtn.disabled = false;
+            if (prevBtn) prevBtn.disabled = false;
+            if (nextBtn) nextBtn.disabled = false;
         } else {
-            var query = document.getElementById('search-input').value.trim();
-            statusEl.textContent = query.length > 0 ? 'No results' : '';
-            prevBtn.disabled = true;
-            nextBtn.disabled = true;
+            var query = document.getElementById('search-input');
+            statusEl.textContent = (query && query.value.trim().length > 0) ? 'No results' : '';
+            if (prevBtn) prevBtn.disabled = true;
+            if (nextBtn) nextBtn.disabled = true;
         }
     }
 
