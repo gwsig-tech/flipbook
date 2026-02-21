@@ -1,0 +1,62 @@
+{{define "admin_index"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flipbook - Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/admin" class="logo">Flipbook</a>
+        <div class="nav-links">
+            <a href="/admin" class="active">Dashboard</a>
+            <a href="/admin/upload" class="btn btn-primary btn-sm">+ Upload</a>
+            <form method="POST" action="/logout" style="margin:0;display:inline;">
+                <button type="submit" class="btn btn-sm" style="border:none;color:var(--text-muted);cursor:pointer;">Logout</button>
+            </form>
+        </div>
+    </nav>
+    <main class="container">
+        <h1>Your Flipbooks</h1>
+        {{if .Flipbooks}}
+        <div class="grid">
+            {{range .Flipbooks}}
+            <a href="/admin/flipbooks/{{.ID}}" class="card">
+                <div class="card-thumb">
+                    {{if eq .Status "ready"}}
+                    <img src="{{index $.ThumbMap .ID}}" alt="{{.Title}}">
+                    {{else}}
+                    <div class="card-placeholder">
+                        {{if eq .Status "converting"}}
+                        <div class="spinner"></div>
+                        {{else if eq .Status "error"}}
+                        <span class="error-icon">!</span>
+                        {{else}}
+                        <span class="pending-icon">...</span>
+                        {{end}}
+                    </div>
+                    {{end}}
+                </div>
+                <div class="card-body">
+                    <h3>{{.Title}}</h3>
+                    <div class="card-meta">
+                        <span class="badge badge-{{.Status}}">{{.Status}}</span>
+                        {{if .PageCount}}<span>{{.PageCount}} pages</span>{{end}}
+                    </div>
+                </div>
+            </a>
+            {{end}}
+        </div>
+        {{else}}
+        <div class="empty-state">
+            <h2>No flipbooks yet</h2>
+            <p>Upload a PowerPoint file to create your first flipbook.</p>
+            <a href="/admin/upload" class="btn btn-primary">Upload PowerPoint</a>
+        </div>
+        {{end}}
+    </main>
+</body>
+</html>
+{{end}}

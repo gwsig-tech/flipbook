@@ -1,0 +1,28 @@
+# Flipbook Configuration
+# Copy this file to config.dev.yaml (for development) or config.yaml (for production)
+# Environment variables override these values (prefixed with FLIPBOOK_)
+
+# Server
+port: "8080"
+base_url: "http://localhost:8080"
+
+# Storage
+data_dir: "./data"
+
+# MongoDB
+mongo_uri: "mongodb+srv://user:password@cluster.mongodb.net/?appName=Flipbook"
+mongo_db: "flipbook"
+
+# LibreOffice (auto-detected if blank)
+libreoffice_bin: ""
+
+# Upload limits
+max_upload_size: 104857600  # 100MB in bytes
+
+# Image quality
+conversion_dpi: 300         # Full-size page images
+thumbnail_dpi: 72           # Thumbnail images
+
+# Security
+session_secret: ""          # Random 64-char hex string; auto-generated if blank
+api_key: ""                 # Bearer token for API access; leave blank to disable API auth

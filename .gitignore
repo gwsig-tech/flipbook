@@ -1,0 +1,16 @@
+# Binaries
+bin/
+flipbook
+
+# Runtime data
+data/
+
+# Dev config (contains secrets)
+config.dev.yaml
+
+# OS files
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

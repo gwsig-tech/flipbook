@@ -1,0 +1,113 @@
+{{define "admin_upload"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload - Flipbook</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/admin" class="logo">Flipbook</a>
+        <div class="nav-links">
+            <a href="/admin">Dashboard</a>
+            <a href="/admin/upload" class="active">Upload</a>
+            <form method="POST" action="/logout" style="margin:0;display:inline;">
+                <button type="submit" class="btn btn-sm" style="border:none;color:var(--text-muted);cursor:pointer;">Logout</button>
+            </form>
+        </div>
+    </nav>
+    <main class="container">
+        <!-- Upload Form (shown initially) -->
+        <div id="upload-section">
+            <h1>Upload PowerPoint</h1>
+            <form action="/admin/upload" method="POST" enctype="multipart/form-data" id="upload-form">
+                <div class="form-group">
+                    <label for="title">Title (optional)</label>
+                    <input type="text" id="title" name="title" placeholder="Leave blank to use filename">
+                </div>
+                <div class="form-group">
+                    <div class="dropzone" id="dropzone">
+                        <input type="file" id="file" name="file" accept=".pptx,.ppt" required>
+                        <div class="dropzone-content">
+                            <div class="dropzone-icon">&#128196;</div>
+                            <p>Drag & drop a PowerPoint file here</p>
+                            <p class="text-muted">or click to browse (.pptx, .ppt)</p>
+                        </div>
+                        <div class="dropzone-file hidden" id="file-info">
+                            <span id="file-name"></span>
+                            <span id="file-size"></span>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">Upload & Convert</button>
+            </form>
+        </div>
+
+        <!-- Progress Tracker (shown after upload starts) -->
+        <div id="progress-section" class="hidden">
+            <h1 id="progress-title">Processing your presentation</h1>
+
+            <div class="conversion-tracker">
+                <div class="tracker-step" id="step-upload">
+                    <div class="tracker-icon">
+                        <div class="tracker-spinner"></div>
+                        <svg class="tracker-check hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="tracker-info">
+                        <div class="tracker-label">Uploading file</div>
+                        <div class="tracker-detail" id="upload-detail"></div>
+                    </div>
+                </div>
+
+                <div class="tracker-step pending" id="step-queue">
+                    <div class="tracker-icon">
+                        <div class="tracker-spinner"></div>
+                        <svg class="tracker-check hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="tracker-info">
+                        <div class="tracker-label">Queued for processing</div>
+                        <div class="tracker-detail" id="queue-detail"></div>
+                    </div>
+                </div>
+
+                <div class="tracker-step pending" id="step-convert">
+                    <div class="tracker-icon">
+                        <div class="tracker-spinner"></div>
+                        <svg class="tracker-check hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="tracker-info">
+                        <div class="tracker-label">Converting to flipbook</div>
+                        <div class="tracker-detail" id="convert-detail">PDF conversion, page rendering, text extraction</div>
+                    </div>
+                </div>
+
+                <div class="tracker-step pending" id="step-done">
+                    <div class="tracker-icon">
+                        <div class="tracker-spinner"></div>
+                        <svg class="tracker-check hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="tracker-info">
+                        <div class="tracker-label">Ready</div>
+                        <div class="tracker-detail" id="done-detail"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-bar" id="upload-progress">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+
+            <div id="error-message" class="hidden">
+                <div class="status-card error">
+                    <p><strong>Conversion failed:</strong> <span id="error-text"></span></p>
+                    <a href="/admin/upload" class="btn" style="margin-top: 12px;">Try again</a>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>
+{{end}}

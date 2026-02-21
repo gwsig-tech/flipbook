@@ -1,0 +1,23 @@
+{{define "layout"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{block "title" .}}Flipbook{{end}}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/admin" class="logo">Flipbook</a>
+        <div class="nav-links">
+            <a href="/admin">Dashboard</a>
+            <a href="/admin/upload">Upload</a>
+        </div>
+    </nav>
+    <main class="container">
+        {{block "content" .}}{{end}}
+    </main>
+</body>
+</html>
+{{end}}
