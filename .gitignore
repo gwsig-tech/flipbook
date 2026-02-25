@@ -15,3 +15,6 @@ config.prod.yaml
 # IDE
 .vscode/
 .idea/
+
+# Static site build output
+site/public/

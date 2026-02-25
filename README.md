@@ -1,5 +1,7 @@
 # Flipbook
 
+Forked from [jonradoff/flipbook](https://github.com/jonradoff/flipbook).
+
 A lightweight, self-hosted flipbook generator. Upload PowerPoint or PDF files and get beautiful 3D page-curl flipbooks hosted as SEO-optimized webpages, or embeddable in any site via iframe.
 
 **[See a live example](https://metavert.io/flipbook)**
@@ -13,6 +15,7 @@ A lightweight, self-hosted flipbook generator. Upload PowerPoint or PDF files an
 - **Embeddable** via iframe with a single line of HTML, or host directly as standalone pages
 - **Grid view** for browsing all slides at a glance
 - **Full-text search** across slide content
+- **Static site mode** — convert PDFs locally and deploy to Vercel, Netlify, or any static host (no server required)
 - **MCP server** for creating flipbooks from AI agent workflows (Claude Code, Cowork, etc.)
 - **Admin dashboard** with upload progress tracking, thumbnail previews, and embed code generation
 - **Password-protected admin** with bcrypt-hashed credentials and session-based auth
@@ -193,6 +196,65 @@ Configure in Claude Code (`~/.claude/settings.json`) or any MCP-compatible tool:
 | `get_flipbook_status` | Check conversion status |
 | `delete_flipbook` | Delete a flipbook and its files |
 
+## Static Site Deployment (Vercel / Netlify / GitHub Pages)
+
+If you don't need the full server, you can convert PDFs locally and deploy the viewer as a static site. No Go, MongoDB, or server infrastructure required — just Poppler and Python.
+
+### Prerequisites
+
+- **Poppler** (`pdftoppm`, `pdftotext`) — see [Prerequisites](#prerequisites) above
+- **Python 3** (for build script config processing)
+
+### Workflow
+
+**1. Convert a PDF to flipbook images:**
+
+```bash
+bash site/convert.sh path/to/slides.pdf my-talk [dpi]
+```
+
+This renders the PDF into PNGs at the specified DPI (default: 200) and creates `site/flipbooks/my-talk/` with page images, thumbnails, and a `config.json`. Edit the config to set the display title.
+
+**2. Build the static site:**
+
+```bash
+bash site/build.sh
+```
+
+Generates `site/public/` containing the complete static site with all viewers, assets, and page images.
+
+**3. Preview locally:**
+
+```bash
+npx serve site/public
+```
+
+**4. Deploy:**
+
+- **Vercel**: Push to GitHub and connect the repo in Vercel (the included `vercel.json` configures the build automatically), or run `vercel --prod` from the repo root.
+- **Netlify / other**: Point the build command to `bash site/build.sh` and the publish directory to `site/public`.
+
+### Static site URL structure
+
+| Path | Description |
+|------|-------------|
+| `/` | Index page listing all flipbooks |
+| `/v/{slug}` | Full viewer with SEO meta tags |
+| `/embed/{slug}` | iframe-embeddable viewer (permissive headers) |
+
+### Embedding a static flipbook
+
+```html
+<iframe src="https://your-site.vercel.app/embed/my-talk"
+        width="800" height="600" frameborder="0" allowfullscreen
+        style="border:none;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+</iframe>
+```
+
+### Adding more flipbooks
+
+Repeat the convert + build steps for each PDF. All flipbooks in `site/flipbooks/` are included in the build. The `site/flipbooks/` directory (with rendered PNGs) is committed to git — expect ~5–15 MB per presentation at 200 DPI.
+
 ## Project Structure
 
 ```
@@ -208,9 +270,15 @@ flipbook/
 │   ├── models/flipbook.go           # Data models
 │   ├── storage/storage.go           # Filesystem storage
 │   └── worker/worker.go             # Background conversion queue
+├── site/
+│   ├── convert.sh                   # PDF→PNG conversion script (local)
+│   ├── build.sh                     # Static site generator
+│   ├── flipbooks/                   # Converted flipbook data (committed)
+│   └── public/                      # Build output (gitignored)
 ├── web/
 │   ├── templates/                   # Go HTML templates
 │   └── static/                      # CSS, JS, vendored libraries
+├── vercel.json                      # Vercel deployment config
 ├── config.example.yaml              # Example configuration
 └── data/                            # Runtime data (gitignored)
 ```
